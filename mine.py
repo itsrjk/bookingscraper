@@ -29,30 +29,34 @@ def scrape_hotel_urls(driver):
     return hotel_urls
 
 def scrape_hotel_data(driver,hotel_urls):
-    hotels=dict()
     # for every url, scrape the data and add to dictionary
     for url in hotel_urls:
         driver.get(url)
         time.sleep(5)
-        hotels['name'] = driver.find_element_by_id('hp_hotel_name').text.strip('Hotel')
-        hotels['rating'] = driver.find_element_by_class_name(
+        print(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel'))
+        print(driver.find_element_by_class_name(
         'bui-review-score--end').find_element_by_class_name(
-        'bui-review-score__badge').text
+        'bui-review-score__badge').text)
+
 
   
+def main():
+    #misc webdriver options
+    options=Options()
+    options.add_argument("-headless")
+    driver = webdriver.Chrome(options=options)
+    #link
+    driver.get('https://www.booking.com/')
+    #go to city
+    choose_city(driver,"Singapore")
+    #get the urls for each hotel
+    hotel_urls=scrape_hotel_urls(driver)
+    #get data from each hotel
+    scrape_hotel_data(driver,hotel_urls)
 
-#misc webdriver options
-options=Options()
-options.add_argument("-headless")
-driver = webdriver.Chrome(options=options)
-#link
-driver.get('https://www.booking.com/')
-#go to city
-choose_city(driver,"Singapore")
-#get the urls for each hotel
-hotel_urls=scrape_hotel_urls(driver)
-#get data from each hotel
-scrape_hotel_data(driver,hotel_urls)
+if __name__ == "__main__":
+    main()
+
 
 
 
