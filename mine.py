@@ -99,11 +99,11 @@ def main():
     no_of_reviews=100
     language="English"
     city="Singapore"
-    headless=True
+    headless=False
 
     #webdriver options
     options=Options()
-    options.add_argument("-headless") if headless else options.add_argument("")
+    options.add_argument("-headless") if headless else options
     driver = webdriver.Chrome(options=options)
     
     print("Starting chrome...")
