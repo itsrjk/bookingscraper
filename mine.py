@@ -21,7 +21,7 @@ def scrape_hotel_urls(driver,no_of_hotels):
     #why am i sorting by distance from city centre?
     #cause booking.com puts a shamelessly sponsored property of each result on top ffs
     driver.find_element_by_link_text("Distance from city centre").click()
-    time.sleep(2)
+    time.sleep(3)
     hotel_urls=list()
     i=0
 
@@ -37,7 +37,7 @@ def scrape_hotel_urls(driver,no_of_hotels):
             if i==no_of_hotels:
                 return hotel_urls
         driver.find_element_by_xpath("//*[@title='Next page']").click()
-        time.sleep(2)
+        time.sleep(3)
 
 def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
 
@@ -48,7 +48,7 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
         #go to site
         driver.get(url)
         #allowing site to load
-        time.sleep(2)
+        time.sleep(3)
         #get the hotel name
         print(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip()," : ",end="")
         #get the overall review score
@@ -57,12 +57,12 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
         #go to the reviews tab
         reviews_button=driver.find_element_by_id("show_reviews_tab")
         reviews_button.click()
-        time.sleep(1)
+        time.sleep(3)
 
         #filter by new to old
         select = Select(driver.find_element_by_id('review_sort'))
         select.select_by_value("f_recent_desc")
-        time.sleep(1)
+        time.sleep(3)
 
         #filter by language
         #driver.find_element_by_class_name("bui-input-checkbutton").click()
@@ -90,7 +90,7 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
                 break
             # go to next page
             driver.find_element_by_class_name("pagenext").click()
-            time.sleep(2)
+            time.sleep(3)
         print("------------")
 
 def main():
