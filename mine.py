@@ -13,7 +13,8 @@ no_of_hotels=2
 no_of_reviews=3
 language="English"
 city="Singapore"
-headless=False
+headless=True
+DEBUG=1
 name_of_file="test.arff"
 
 def choose_city(driver,city):
@@ -61,10 +62,10 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
         time.sleep(3)
         #get the hotel name
         hotel_line[1]=(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip())
-        #print(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip()," : ",end="")
-        #get the overall review score
+        if DEBUG: print(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip()," : ",end="")
+        #get the overall review score 
         hotel_line[2]=(driver.find_element_by_class_name('bui-review-score--end').find_element_by_class_name('bui-review-score__badge').text)
-        #print(driver.find_element_by_class_name('bui-review-score--end').find_element_by_class_name('bui-review-score__badge').text)
+        if DEBUG: print(driver.find_element_by_class_name('bui-review-score--end').find_element_by_class_name('bui-review-score__badge').text)
 
         #go to the reviews tab
         reviews_button=driver.find_element_by_id("show_reviews_tab")
@@ -87,18 +88,15 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
                 #this try except block is to ignore ratings without comment title
                 try:
                     #review title
-                    #print(j,") ",review.find_element_by_class_name("c-review-block__title").get_attribute("innerHTML").strip()," : ",end="")
+                    if DEBUG: print(j,") ",review.find_element_by_class_name("c-review-block__title").get_attribute("innerHTML").strip()," : ",end="")
                     hotel_line[3]=review.find_element_by_class_name("c-review-block__title").get_attribute("innerHTML").strip()
                     #review score
                     hotel_line[4]=review.find_element_by_class_name("bui-review-score__badge").get_attribute("aria-label").strip("Scored ").strip()
-                    #print(review.find_element_by_class_name("bui-review-score__badge").get_attribute("aria-label").strip("Scored ").strip())
-                    #print(hotel_line)
+                    if DEBUG: print(review.find_element_by_class_name("bui-review-score__badge").get_attribute("aria-label").strip("Scored ").strip())
                     hotel_data.append(hotel_line[:])
                     j=j+1
-                    #print(hotel_data)
                     if j==no_of_reviews:
                         break
-                #except selenium.common.exceptions.NoSuchElementException:
                 except Exception as e:
                     continue
             # even java has loop naming but python doesn't ;-;
@@ -116,19 +114,20 @@ def write_to_file(data_to_write):
     f=open(name_of_file,"a")
     print("Writing to file...")
     for line in data_to_write:
-        f.write(line[0])
+        f.write("\""+line[0]+"\"")
         f.write(",")
-        f.write(line[1])
+        f.write("\""+line[1]+"\"")
         f.write(",")
         f.write(line[2])
         f.write(",")
-        f.write(line[3])
+        f.write("\""+line[3]+"\"")
         f.write(",")
         f.write(line[4])
         f.write("\n")
     f.close()
 
 def initialize_file():
+    print("initializing arff file")
     create=open(name_of_file,"x")
     create.close()
 
@@ -141,6 +140,7 @@ def initialize_file():
     header.write("@attribute comment string\n")
     header.write("@attribute comment_rating numeric\n")
     header.write("\n")
+    header.write("@data\n")
     header.close()
 
 def main():
@@ -159,14 +159,14 @@ def main():
 
     #set whatever values needed
     choose_city(driver,city)
-
+    #set relation and attributes
+    initialize_file()
     #get the urls for each hotel
     hotel_urls=scrape_hotel_urls(driver,no_of_hotels)
     #get data from each hotel
     scrape_hotel_data(driver,hotel_urls,no_of_reviews,language)
 
 if __name__ == "__main__":
-    #initialize_file("test.arff")
     main()
 
 
