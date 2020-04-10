@@ -8,6 +8,14 @@ import selenium.common.exceptions
 import time
 import math
 
+
+no_of_hotels=2
+no_of_reviews=3
+language="English"
+city="Singapore"
+headless=False
+name_of_file="test.arff"
+
 def choose_city(driver,city):
     search_field = driver.find_element_by_id('ss')
     search_field.send_keys(city)
@@ -40,7 +48,9 @@ def scrape_hotel_urls(driver,no_of_hotels):
         time.sleep(3)
 
 def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
-
+    hotel_data= []
+    hotel_line= [None] * 5
+    hotel_line[0]=city
     print("Starting to scrape ", no_of_reviews," reviews for",len(hotel_urls),"hotels...")
 
     # for every hotel
@@ -50,9 +60,11 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
         #allowing site to load
         time.sleep(3)
         #get the hotel name
-        print(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip()," : ",end="")
+        hotel_line[1]=(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip())
+        #print(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip()," : ",end="")
         #get the overall review score
-        print(driver.find_element_by_class_name('bui-review-score--end').find_element_by_class_name('bui-review-score__badge').text)
+        hotel_line[2]=(driver.find_element_by_class_name('bui-review-score--end').find_element_by_class_name('bui-review-score__badge').text)
+        #print(driver.find_element_by_class_name('bui-review-score--end').find_element_by_class_name('bui-review-score__badge').text)
 
         #go to the reviews tab
         reviews_button=driver.find_element_by_id("show_reviews_tab")
@@ -68,38 +80,70 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
         #driver.find_element_by_class_name("bui-input-checkbutton").click()
 
         #scrape reviews
-        j=1  
+        j=0
         while True:
             reviews=driver.find_elements_by_class_name("review_list_new_item_block")
             for review in reviews:
                 #this try except block is to ignore ratings without comment title
                 try:
                     #review title
-                    print(j,") ",review.find_element_by_class_name("c-review-block__title").get_attribute("innerHTML").strip()," : ",end="")
+                    #print(j,") ",review.find_element_by_class_name("c-review-block__title").get_attribute("innerHTML").strip()," : ",end="")
+                    hotel_line[3]=review.find_element_by_class_name("c-review-block__title").get_attribute("innerHTML").strip()
                     #review score
-                    print(review.find_element_by_class_name("bui-review-score__badge").get_attribute("aria-label").strip("Scored ").strip())
+                    hotel_line[4]=review.find_element_by_class_name("bui-review-score__badge").get_attribute("aria-label").strip("Scored ").strip()
+                    #print(review.find_element_by_class_name("bui-review-score__badge").get_attribute("aria-label").strip("Scored ").strip())
+                    #print(hotel_line)
+                    hotel_data.append(hotel_line[:])
                     j=j+1
-                    if j==no_of_reviews+1:
+                    #print(hotel_data)
+                    if j==no_of_reviews:
                         break
                 #except selenium.common.exceptions.NoSuchElementException:
                 except Exception as e:
                     continue
             # even java has loop naming but python doesn't ;-;
             # this is to check if we're here because of the nested break                 
-            if j==no_of_reviews+1:
+            if j==no_of_reviews:
                 break
             # go to next page
             driver.find_element_by_class_name("pagenext").click()
             time.sleep(3)
-        print("------------")
+        #print("------------")
+        write_to_file(hotel_data)
+        hotel_data=[]    
+
+def write_to_file(data_to_write):
+    f=open(name_of_file,"a")
+    print("Writing to file...")
+    for line in data_to_write:
+        f.write(line[0])
+        f.write(",")
+        f.write(line[1])
+        f.write(",")
+        f.write(line[2])
+        f.write(",")
+        f.write(line[3])
+        f.write(",")
+        f.write(line[4])
+        f.write("\n")
+    f.close()
+
+def initialize_file():
+    create=open(name_of_file,"x")
+    create.close()
+
+    header=open(name_of_file,"a")
+    header.write("@relation booking.com\n")
+    header.write("\n")
+    header.write("@attribute city string\n")
+    header.write("@attribute hotel_name string\n")
+    header.write("@attribute hotel_rating numeric\n")
+    header.write("@attribute comment string\n")
+    header.write("@attribute comment_rating numeric\n")
+    header.write("\n")
+    header.close()
 
 def main():
-
-    no_of_hotels=20
-    no_of_reviews=100
-    language="English"
-    city="Singapore"
-    headless=False
 
     #webdriver options
     options=Options()
@@ -122,6 +166,7 @@ def main():
     scrape_hotel_data(driver,hotel_urls,no_of_reviews,language)
 
 if __name__ == "__main__":
+    #initialize_file("test.arff")
     main()
 
 
