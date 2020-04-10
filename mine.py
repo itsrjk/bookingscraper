@@ -9,13 +9,13 @@ import time
 import math
 
 
-no_of_hotels=2
-no_of_reviews=3
+no_of_hotels=20
+no_of_reviews=100
 language="English"
 city="Singapore"
 headless=True
 DEBUG=1
-name_of_file="test.arff"
+name_of_file="singapore.arff"
 
 def choose_city(driver,city):
     search_field = driver.find_element_by_id('ss')
@@ -104,7 +104,10 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
             if j==no_of_reviews:
                 break
             # go to next page
-            driver.find_element_by_class_name("pagenext").click()
+            try:
+                driver.find_element_by_class_name("pagenext").click()
+            except selenium.common.exceptions.NoSuchElementException:
+                break
             time.sleep(3)
         #print("------------")
         write_to_file(hotel_data)
