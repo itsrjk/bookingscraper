@@ -1,13 +1,13 @@
-#Summary
+# Summary
 This code allows you to mine the rating and comments of hotels from www.booking.com
 
-#Requirements
+# Requirements
 Chrome/Chromium
 
-#To run
+# To run
 `python3 scrape.py`
 
-#Contributing
+# Contributing
 Please feel free to make a PR
 
 > [!CAUTION]
