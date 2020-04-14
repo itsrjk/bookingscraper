@@ -12,10 +12,10 @@ import math
 no_of_hotels=20
 no_of_reviews=100
 language="English"
-city="Singapore"
+city="Kuala Lampur"
 headless=True
 DEBUG=1
-name_of_file="singapore.arff"
+name_of_file="klampur.arff"
 
 def choose_city(driver,city):
     search_field = driver.find_element_by_id('ss')
@@ -53,6 +53,7 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
     hotel_line= [None] * 5
     hotel_line[0]=city
     print("Starting to scrape ", no_of_reviews," reviews for",len(hotel_urls),"hotels...")
+    counter=0
 
     # for every hotel
     for url in hotel_urls:    
@@ -61,11 +62,15 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
         #allowing site to load
         time.sleep(3)
         #get the hotel name
-        hotel_line[1]=(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip())
-        if DEBUG: print(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip()," : ",end="")
-        #get the overall review score 
-        hotel_line[2]=(driver.find_element_by_class_name('bui-review-score--end').find_element_by_class_name('bui-review-score__badge').text)
-        if DEBUG: print(driver.find_element_by_class_name('bui-review-score--end').find_element_by_class_name('bui-review-score__badge').text)
+        try:
+            hotel_line[1]=(driver.find_element_by_id('hp_hotel_name').text.strip('Hotel').strip().replace("\n"," "))
+            if DEBUG: print(counter,") ",hotel_line[1]," : ",end="")
+            counter=counter+1
+            #get the overall review score 
+            hotel_line[2]=(driver.find_element_by_class_name('bui-review-score--end').find_element_by_class_name('bui-review-score__badge').text)
+            if DEBUG: print(hotel_line[2])
+        except selenium.common.exceptions.NoSuchElementException:
+            continue
 
         #go to the reviews tab
         reviews_button=driver.find_element_by_id("show_reviews_tab")
@@ -88,11 +93,11 @@ def scrape_hotel_data(driver,hotel_urls,no_of_reviews,language):
                 #this try except block is to ignore ratings without comment title
                 try:
                     #review title
+                    hotel_line[3]=review.find_element_by_class_name("c-review-block__title").get_attribute("innerHTML").strip().replace("\n"," ")
                     if DEBUG: print(j,") ",review.find_element_by_class_name("c-review-block__title").get_attribute("innerHTML").strip()," : ",end="")
-                    hotel_line[3]=review.find_element_by_class_name("c-review-block__title").get_attribute("innerHTML").strip()
                     #review score
                     hotel_line[4]=review.find_element_by_class_name("bui-review-score__badge").get_attribute("aria-label").strip("Scored ").strip()
-                    if DEBUG: print(review.find_element_by_class_name("bui-review-score__badge").get_attribute("aria-label").strip("Scored ").strip())
+                    if DEBUG: print(hotel_line[4])
                     hotel_data.append(hotel_line[:])
                     j=j+1
                     if j==no_of_reviews:
